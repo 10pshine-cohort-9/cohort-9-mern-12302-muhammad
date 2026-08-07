@@ -12,10 +12,12 @@ const errorHandler = (err, req, res, next) => {
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   }, `Exception caught in middleware: ${err.message}`);
 
+  const message = err.isOperational ? err.message : 'Internal Server Error';
+
   const response = {
     success: false,
     status: err.statusCode,
-    message: err.message || 'Internal Server Error',
+    message,
   };
 
   if (process.env.NODE_ENV === 'development' && err.stack) {

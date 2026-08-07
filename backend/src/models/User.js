@@ -1,5 +1,13 @@
 const { DataTypes } = require('sequelize');
+const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/db');
+
+const hashPasswordHook = async (user) => {
+  if (user.changed('password')) {
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password, salt);
+  }
+};
 
 const User = sequelize.define(
   'User',
@@ -31,7 +39,15 @@ const User = sequelize.define(
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    hooks: {
+      beforeCreate: hashPasswordHook,
+      beforeUpdate: hashPasswordHook,
+    },
   }
 );
+
+User.prototype.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = User;

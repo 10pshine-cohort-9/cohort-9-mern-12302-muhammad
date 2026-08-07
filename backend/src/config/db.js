@@ -1,12 +1,15 @@
 const { Sequelize } = require('sequelize');
-const mysql = require('mysql2/promise');
 const logger = require('./logger');
 
-const dbName = process.env.DB_NAME || 'notes_app_db';
-const dbUser = process.env.DB_USER || 'root';
+const dbName = process.env.DB_NAME;
+const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASSWORD || '';
 const dbHost = process.env.DB_HOST || 'localhost';
 const dbPort = process.env.DB_PORT || 3306;
+
+if (!dbName || !dbUser) {
+  logger.error('Missing required database environment variables (DB_NAME, DB_USER)');
+}
 
 const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   host: dbHost,
@@ -19,26 +22,8 @@ const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   },
 });
 
-const ensureDatabaseExists = async () => {
-  try {
-    const connection = await mysql.createConnection({
-      host: dbHost,
-      port: dbPort,
-      user: dbUser,
-      password: dbPassword,
-    });
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
-    await connection.end();
-    logger.info(`Database schema checked/created: ${dbName}`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to verify/create database: ${dbName}`);
-    throw error;
-  }
-};
-
 const connectDB = async () => {
   try {
-    await ensureDatabaseExists();
     await sequelize.authenticate();
     logger.info(`MySQL Connected Successfully to database: ${dbName} at ${dbHost}:${dbPort}`);
   } catch (error) {
