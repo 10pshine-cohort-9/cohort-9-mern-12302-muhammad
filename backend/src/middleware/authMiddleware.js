@@ -15,7 +15,7 @@ const protect = async (req, res, next) => {
       return next(new AppError('Authentication failed: No token provided', 401));
     }
 
-    const secret = process.env.JWT_SECRET || 'fallback_secret_key';
+    const secret = process.env.JWT_SECRET;
     const decoded = jwt.verify(token, secret);
 
     const user = await User.findByPk(decoded.id, {

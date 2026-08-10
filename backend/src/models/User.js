@@ -4,8 +4,12 @@ const { sequelize } = require('../config/db');
 
 const hashPasswordHook = async (user) => {
   if (user.changed('password')) {
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
+    try {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(user.password, salt);
+    } catch (error) {
+      throw new Error('Password hashing failed');
+    }
   }
 };
 
@@ -47,7 +51,11 @@ const User = sequelize.define(
 );
 
 User.prototype.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw new Error('Password comparison failed');
+  }
 };
 
 module.exports = User;
