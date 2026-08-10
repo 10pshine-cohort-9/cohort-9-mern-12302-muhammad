@@ -14,6 +14,11 @@ const { sequelize } = require('./src/models');
 
 const PORT = process.env.PORT || 5000;
 
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your_jwt_secret_key_here') {
+  logger.error('FATAL ERROR: JWT_SECRET is not defined or is set to a placeholder value.');
+  process.exit(1);
+}
+
 let server;
 
 const startServer = async () => {
