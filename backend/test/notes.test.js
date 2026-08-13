@@ -22,8 +22,9 @@ describe('Notes API Integration Tests', () => {
   before(async () => {
     try {
       await connectDB();
-      if (!sequelize.config.database.includes('test')) {
-        throw new Error('Safety guard: Not connected to a test database');
+      const dbName = sequelize.config.database;
+      if (dbName !== 'notes_app_test' && !/^.*_test$/i.test(dbName)) {
+        throw new Error(`Safety guard: Database name '${dbName}' is not an approved test database`);
       }
       await sequelize.sync({ force: true });
 
@@ -53,118 +54,240 @@ describe('Notes API Integration Tests', () => {
 
   describe('Unauthorized Access', () => {
     it('should reject POST /api/notes without token', async () => {
-      const res = await request(app)
-        .post('/api/notes')
-        .send({ title: 'Test Note', content: 'Test Content' })
-        .expect(401);
-      
-      expect(res.body).to.have.property('success', false);
+      try {
+        const res = await request(app)
+          .post('/api/notes')
+          .send({ title: 'Test Note', content: 'Test Content' })
+          .expect(401);
+        
+        expect(res.body).to.have.property('success', false);
+      } catch (error) {
+        error.message = `Test context: POST /api/notes without token. ${error.message}`;
+        throw error;
+      }
     });
 
     it('should reject GET /api/notes without token', async () => {
-      const res = await request(app)
-        .get('/api/notes')
-        .expect(401);
-      
-      expect(res.body).to.have.property('success', false);
+      try {
+        const res = await request(app)
+          .get('/api/notes')
+          .expect(401);
+        
+        expect(res.body).to.have.property('success', false);
+      } catch (error) {
+        error.message = `Test context: GET /api/notes without token. ${error.message}`;
+        throw error;
+      }
     });
   });
 
   describe('Notes CRUD Operations', () => {
     it('should create a new note', async () => {
-      const noteData = {
-        title: 'My First Note',
-        content: 'This is the content of my first note',
-      };
+      try {
+        const noteData = {
+          title: 'My First Note',
+          content: 'This is the content of my first note',
+        };
 
-      const res = await request(app)
-        .post('/api/notes')
-        .set('Authorization', `Bearer ${userToken}`)
-        .send(noteData)
-        .expect(201);
+        const res = await request(app)
+          .post('/api/notes')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send(noteData)
+          .expect(201);
 
-      expect(res.body).to.have.property('success', true);
-      expect(res.body.data).to.have.property('title', noteData.title);
-      expect(res.body.data).to.have.property('content', noteData.content);
-      expect(res.body.data).to.have.property('user_id', userId);
+        expect(res.body).to.have.property('success', true);
+        expect(res.body.data).to.have.property('title', noteData.title);
+        expect(res.body.data).to.have.property('content', noteData.content);
+        expect(res.body.data).to.have.property('user_id', userId);
 
-      testNoteId = res.body.data.id;
+        testNoteId = res.body.data.id;
+      } catch (error) {
+        error.message = `Test context: Create a new note. ${error.message}`;
+        throw error;
+      }
     });
 
     it('should fail to create a note without a title', async () => {
-      const res = await request(app)
-        .post('/api/notes')
-        .set('Authorization', `Bearer ${userToken}`)
-        .send({ content: 'Only content' })
-        .expect(400);
+      try {
+        const res = await request(app)
+          .post('/api/notes')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({ content: 'Only content' })
+          .expect(400);
 
-      expect(res.body).to.have.property('success', false);
+        expect(res.body).to.have.property('success', false);
+      } catch (error) {
+        error.message = `Test context: Fail to create note without title. ${error.message}`;
+        throw error;
+      }
     });
 
     it('should fetch all notes for the logged-in user', async () => {
-      const res = await request(app)
-        .get('/api/notes')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      try {
+        const res = await request(app)
+          .get('/api/notes')
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(200);
 
-      expect(res.body).to.have.property('success', true);
-      expect(res.body.data).to.be.an('array');
-      expect(res.body.data.length).to.be.at.least(1);
-      expect(res.body.data[0]).to.have.property('id', testNoteId);
+        expect(res.body).to.have.property('success', true);
+        expect(res.body.data).to.be.an('array');
+        expect(res.body.data.length).to.be.at.least(1);
+        expect(res.body.data[0]).to.have.property('id', testNoteId);
+      } catch (error) {
+        error.message = `Test context: Fetch all notes for user. ${error.message}`;
+        throw error;
+      }
     });
 
     it('should fetch a single note by id', async () => {
-      const res = await request(app)
-        .get(`/api/notes/${testNoteId}`)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      try {
+        const res = await request(app)
+          .get(`/api/notes/${testNoteId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(200);
 
-      expect(res.body).to.have.property('success', true);
-      expect(res.body.data).to.have.property('id', testNoteId);
+        expect(res.body).to.have.property('success', true);
+        expect(res.body.data).to.have.property('id', testNoteId);
+      } catch (error) {
+        error.message = `Test context: Fetch a single note by ID. ${error.message}`;
+        throw error;
+      }
     });
 
     it('should return 404 when fetching a non-existent note', async () => {
-      const res = await request(app)
-        .get('/api/notes/999999')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(404);
+      try {
+        const res = await request(app)
+          .get('/api/notes/999999')
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(404);
 
-      expect(res.body).to.have.property('success', false);
+        expect(res.body).to.have.property('success', false);
+      } catch (error) {
+        error.message = `Test context: Fetch non-existent note. ${error.message}`;
+        throw error;
+      }
     });
 
     it('should update an existing note', async () => {
-      const updateData = {
-        title: 'Updated Note Title',
-        content: 'Updated content',
-      };
+      try {
+        const updateData = {
+          title: 'Updated Note Title',
+          content: 'Updated content',
+        };
 
-      const res = await request(app)
-        .put(`/api/notes/${testNoteId}`)
-        .set('Authorization', `Bearer ${userToken}`)
-        .send(updateData)
-        .expect(200);
+        const res = await request(app)
+          .put(`/api/notes/${testNoteId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send(updateData)
+          .expect(200);
 
-      expect(res.body).to.have.property('success', true);
-      expect(res.body.data).to.have.property('title', updateData.title);
-      expect(res.body.data).to.have.property('content', updateData.content);
+        expect(res.body).to.have.property('success', true);
+        expect(res.body.data).to.have.property('title', updateData.title);
+        expect(res.body.data).to.have.property('content', updateData.content);
+      } catch (error) {
+        error.message = `Test context: Update an existing note. ${error.message}`;
+        throw error;
+      }
     });
 
     it('should delete an existing note', async () => {
-      const res = await request(app)
-        .delete(`/api/notes/${testNoteId}`)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      try {
+        const res = await request(app)
+          .delete(`/api/notes/${testNoteId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(200);
 
-      expect(res.body).to.have.property('success', true);
-      expect(res.body.message).to.equal('Note deleted successfully');
+        expect(res.body).to.have.property('success', true);
+        expect(res.body.message).to.equal('Note deleted successfully');
 
-      // Verify it's actually deleted
-      const checkRes = await request(app)
-        .get(`/api/notes/${testNoteId}`)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(404);
-        
-      expect(checkRes.body).to.have.property('success', false);
+        // Verify it's actually deleted
+        const checkRes = await request(app)
+          .get(`/api/notes/${testNoteId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(404);
+          
+        expect(checkRes.body).to.have.property('success', false);
+      } catch (error) {
+        error.message = `Test context: Delete an existing note. ${error.message}`;
+        throw error;
+      }
+    });
+  });
+
+  describe('Ownership and Access Control', () => {
+    let secondUserToken;
+    let secondUserNoteId;
+
+    before(async () => {
+      try {
+        const secondUser = {
+          name: 'Second User',
+          email: 'seconduser@example.com',
+          password: 'password123'
+        };
+        const resUser = await request(app)
+          .post('/api/auth/signup')
+          .send(secondUser);
+        secondUserToken = resUser.body.token;
+
+        const resNote = await request(app)
+          .post('/api/notes')
+          .set('Authorization', `Bearer ${secondUserToken}`)
+          .send({ title: 'Second User Note', content: 'Private content' });
+        secondUserNoteId = resNote.body.data.id;
+      } catch (error) {
+        throw error;
+      }
+    });
+
+    it('should prevent User 1 from accessing User 2\'s note via GET', async () => {
+      try {
+        await request(app)
+          .get(`/api/notes/${secondUserNoteId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(404);
+      } catch (error) {
+        error.message = `Test context: GET other user's note. ${error.message}`;
+        throw error;
+      }
+    });
+
+    it('should prevent User 1 from updating User 2\'s note via PUT', async () => {
+      try {
+        await request(app)
+          .put(`/api/notes/${secondUserNoteId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({ title: 'Hacked Title' })
+          .expect(404);
+
+        // Verify note still exists with original data
+        const resCheck = await request(app)
+          .get(`/api/notes/${secondUserNoteId}`)
+          .set('Authorization', `Bearer ${secondUserToken}`)
+          .expect(200);
+        expect(resCheck.body.data.title).to.equal('Second User Note');
+      } catch (error) {
+        error.message = `Test context: PUT other user's note. ${error.message}`;
+        throw error;
+      }
+    });
+
+    it('should prevent User 1 from deleting User 2\'s note via DELETE', async () => {
+      try {
+        await request(app)
+          .delete(`/api/notes/${secondUserNoteId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(404);
+
+        // Verify note still exists
+        await request(app)
+          .get(`/api/notes/${secondUserNoteId}`)
+          .set('Authorization', `Bearer ${secondUserToken}`)
+          .expect(200);
+      } catch (error) {
+        error.message = `Test context: DELETE other user's note. ${error.message}`;
+        throw error;
+      }
     });
   });
 });

@@ -7,7 +7,7 @@ const createNote = async (req, res, next) => {
     const { title, content } = req.body;
     const user_id = req.user.id;
 
-    if (!title) {
+    if (typeof title !== 'string' || title.trim() === '') {
       return next(new AppError('Please provide a title for the note', 400));
     }
 
@@ -83,7 +83,12 @@ const updateNote = async (req, res, next) => {
       return next(new AppError('Note not found', 404));
     }
 
-    if (title !== undefined) note.title = title;
+    if (title !== undefined) {
+      if (typeof title !== 'string' || title.trim() === '') {
+        return next(new AppError('Please provide a title for the note', 400));
+      }
+      note.title = title;
+    }
     if (content !== undefined) note.content = content;
 
     await note.save();
