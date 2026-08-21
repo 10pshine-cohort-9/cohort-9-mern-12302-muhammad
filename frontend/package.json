@@ -11,14 +11,12 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
-    "autoprefixer": "^10.5.4",
     "axios": "^1.19.0",
     "lucide-react": "^1.33.0",
     "postcss": "^8.5.26",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.85.0",
-    "react-quill": "^2.0.0",
     "react-router-dom": "^7.18.2",
     "tailwindcss": "^4.3.3"
   },

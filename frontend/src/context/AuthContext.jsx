@@ -10,28 +10,34 @@ export const AuthProvider = ({ children }) => {
   // Load user on startup
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
           const res = await authService.getMe();
           setUser(res.user);
-        } catch (error) {
-          console.error("Token invalid or expired", error);
-          localStorage.removeItem('token');
-          setUser(null);
         }
+      } catch (error) {
+        console.error("Token invalid or expired", error);
+        localStorage.removeItem('token');
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     initAuth();
   }, []);
 
   const login = async (credentials) => {
-    const res = await authService.login(credentials);
-    const { token, user: loggedInUser } = res;
-    localStorage.setItem('token', token);
-    setUser(loggedInUser);
-    return res;
+    try {
+      const res = await authService.login(credentials);
+      const { token, user: loggedInUser } = res;
+      localStorage.setItem('token', token);
+      setUser(loggedInUser);
+      return res;
+    } catch (error) {
+      console.error("Login failed", error);
+      throw error;
+    }
   };
 
   const logout = () => {

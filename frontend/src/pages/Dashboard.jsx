@@ -10,7 +10,7 @@ const Dashboard = () => {
       <nav className="bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <h1 className="text-xl font-bold text-blue-600">NotesApp</h1>
             </div>
             <div className="flex items-center space-x-4">
