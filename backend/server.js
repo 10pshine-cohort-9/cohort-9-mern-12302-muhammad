@@ -27,7 +27,7 @@ const startServer = async () => {
     await connectDB();
 
     // 2. Synchronize Database Models
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     logger.info('Database tables synchronized successfully (Users & Notes)');
 
     // 3. Start Express HTTP Server

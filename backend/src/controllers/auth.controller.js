@@ -24,8 +24,8 @@ const signup = async (req, res, next) => {
       return next(new AppError('Please provide a valid email address', 400));
     }
 
-    if (password.length < 6) {
-      return next(new AppError('Password must be at least 6 characters long', 400));
+    if (password.length < 8) {
+      return next(new AppError('Password must be at least 8 characters long', 400));
     }
 
     const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });

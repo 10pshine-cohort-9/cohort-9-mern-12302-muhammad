@@ -4,7 +4,7 @@ const logger = require('../config/logger');
 
 const createNote = async (req, res, next) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, tags } = req.body;
     const user_id = req.user.id;
 
     if (typeof title !== 'string' || title.trim() === '') {
@@ -14,6 +14,7 @@ const createNote = async (req, res, next) => {
     const note = await Note.create({
       title,
       content,
+      tags,
       user_id,
     });
 
@@ -72,7 +73,7 @@ const getNoteById = async (req, res, next) => {
 const updateNote = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body;
+    const { title, content, tags } = req.body;
     const user_id = req.user.id;
 
     const note = await Note.findOne({
@@ -90,6 +91,7 @@ const updateNote = async (req, res, next) => {
       note.title = title;
     }
     if (content !== undefined) note.content = content;
+    if (tags !== undefined) note.tags = tags;
 
     await note.save();
 
