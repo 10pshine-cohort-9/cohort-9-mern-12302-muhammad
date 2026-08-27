@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
-import { X, Save, Hash, Type, Bold, Link } from 'lucide-react';
+import { X, Save, Hash, Type, Bold, Link, Mic, Video } from 'lucide-react';
+import MediaRecorderPanel from './MediaRecorderPanel';
+
+const API_ORIGIN = 'http://localhost:5000';
 
 const NoteEditor = ({ note, onSave, onClose }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
+  const [noteType, setNoteType] = useState('text');
+  const [mediaBlob, setMediaBlob] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   
@@ -18,11 +23,14 @@ const NoteEditor = ({ note, onSave, onClose }) => {
       setTitle(note.title || '');
       setContent(note.content || '');
       setTags(note.tags || '');
+      setNoteType(note.type || 'text');
     } else {
       setTitle('');
       setContent('');
       setTags('');
+      setNoteType('text');
     }
+    setMediaBlob(null);
   }, [note]);
 
   useEffect(() => {
@@ -79,10 +87,15 @@ const NoteEditor = ({ note, onSave, onClose }) => {
       return;
     }
 
+    if ((noteType === 'voice' || noteType === 'video') && !mediaBlob && !note?.media_url) {
+      setError(`Please record a ${noteType} note before saving`);
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setError(null);
-      await onSave({ title, content, tags });
+      await onSave({ title, content, tags, type: noteType, media: mediaBlob });
     } catch (err) {
       console.error('Failed to save note:', err);
       setError(err.response?.data?.message || 'Failed to save note. Please try again.');
@@ -191,6 +204,31 @@ const NoteEditor = ({ note, onSave, onClose }) => {
           </div>
 
           <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Note Type</label>
+            <div className="flex space-x-2">
+              {[
+                { value: 'text', label: 'Text', icon: Type },
+                { value: 'voice', label: 'Voice', icon: Mic },
+                { value: 'video', label: 'Video', icon: Video },
+              ].map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setNoteType(value)}
+                  className={`flex items-center px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                    noteType === value
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white dark:bg-gray-900/50 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <Icon className="h-4 w-4 mr-1.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1">
             <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Tags</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -206,7 +244,21 @@ const NoteEditor = ({ note, onSave, onClose }) => {
             </div>
           </div>
           
-          <div className="flex-grow flex flex-col space-y-1">
+          {noteType !== 'text' && (
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">
+                {noteType === 'voice' ? 'Voice Recording' : 'Video Recording'}
+              </label>
+              <MediaRecorderPanel
+                key={noteType}
+                mode={noteType}
+                existingMediaUrl={note?.media_url && note?.type === noteType ? `${API_ORIGIN}${note.media_url}` : null}
+                onMediaChange={setMediaBlob}
+              />
+            </div>
+          )}
+
+          <div className={`flex-grow flex flex-col space-y-1 ${noteType !== 'text' ? 'hidden' : ''}`}>
             <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Content</label>
             <div className="flex-grow flex flex-col border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden min-h-[350px] bg-white dark:bg-gray-900 shadow-inner">
               <div className="flex-grow flex flex-col h-full quill-parent">

@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const requestLogger = require('./middleware/requestLogger');
@@ -9,7 +10,7 @@ const AppError = require('./utils/AppError');
 const app = express();
 
 // Security HTTP headers
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // Enable CORS
 app.use(cors());
@@ -20,6 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Pino HTTP request logging
 app.use(requestLogger);
+
+// Serve uploaded media files (voice/video notes)
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // API routes
 app.use('/api', routes);

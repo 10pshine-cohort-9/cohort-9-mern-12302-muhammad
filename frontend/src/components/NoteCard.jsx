@@ -1,6 +1,8 @@
 import React from 'react';
-import { Edit2, Trash2, Calendar, Hash } from 'lucide-react';
+import { Edit2, Trash2, Calendar, Hash, Mic, Video } from 'lucide-react';
 import DOMPurify from 'dompurify';
+
+const API_ORIGIN = 'http://localhost:5000';
 
 const NoteCard = ({ note, onEdit, onDelete }) => {
   // Strip HTML tags for preview and truncate
@@ -26,8 +28,22 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
           <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight truncate flex-grow mr-2" title={note.title}>
             {note.title}
           </h3>
+          {note.type === 'voice' && (
+            <Mic className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0" title="Voice Note" />
+          )}
+          {note.type === 'video' && (
+            <Video className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0" title="Video Note" />
+          )}
         </div>
-        
+
+        {note.type === 'voice' && note.media_url && (
+          <audio src={`${API_ORIGIN}${note.media_url}`} controls className="w-full mb-3" />
+        )}
+
+        {note.type === 'video' && note.media_url && (
+          <video src={`${API_ORIGIN}${note.media_url}`} controls className="w-full rounded-lg mb-3 max-h-48 bg-black" />
+        )}
+
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
           {createPreview(note.content) || <span className="italic opacity-50">No content</span>}
         </p>

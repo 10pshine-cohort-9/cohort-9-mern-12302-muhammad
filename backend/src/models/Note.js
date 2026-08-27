@@ -21,6 +21,19 @@ const Note = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    type: {
+      type: DataTypes.ENUM('text', 'voice', 'video'),
+      allowNull: false,
+      defaultValue: 'text',
+    },
+    media_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    media_mime: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
