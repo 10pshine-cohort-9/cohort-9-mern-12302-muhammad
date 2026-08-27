@@ -1,21 +1,22 @@
 import api from './api';
 
+const normalizeError = (error) => new Error(
+  error.response?.data?.message || error.response?.data?.error ||
+  error.message || 'An unexpected network error occurred.'
+);
+
 export const getTasks = async () => {
-  const response = await api.get('/tasks');
-  return response.data;
+  try { return (await api.get('/tasks')).data; } catch (error) { throw normalizeError(error); }
 };
 
 export const createTask = async (taskData) => {
-  const response = await api.post('/tasks', taskData);
-  return response.data;
+  try { return (await api.post('/tasks', taskData)).data; } catch (error) { throw normalizeError(error); }
 };
 
 export const updateTask = async (id, taskData) => {
-  const response = await api.put(`/tasks/${id}`, taskData);
-  return response.data;
+  try { return (await api.put(`/tasks/${id}`, taskData)).data; } catch (error) { throw normalizeError(error); }
 };
 
 export const deleteTask = async (id) => {
-  const response = await api.delete(`/tasks/${id}`);
-  return response.data;
+  try { return (await api.delete(`/tasks/${id}`)).data; } catch (error) { throw normalizeError(error); }
 };

@@ -3,8 +3,7 @@ import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 import { X, Save, Hash, Type, Bold, Link, Mic, Video } from 'lucide-react';
 import MediaRecorderPanel from './MediaRecorderPanel';
-
-const API_ORIGIN = 'http://localhost:5000';
+import { API_ORIGIN } from '../services/api';
 
 const NoteEditor = ({ note, onSave, onClose }) => {
   const [title, setTitle] = useState('');
@@ -12,6 +11,7 @@ const NoteEditor = ({ note, onSave, onClose }) => {
   const [tags, setTags] = useState('');
   const [noteType, setNoteType] = useState('text');
   const [mediaBlob, setMediaBlob] = useState(null);
+  const [mediaAction, setMediaAction] = useState('keep');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   
@@ -31,6 +31,7 @@ const NoteEditor = ({ note, onSave, onClose }) => {
       setNoteType('text');
     }
     setMediaBlob(null);
+    setMediaAction('keep');
   }, [note]);
 
   useEffect(() => {
@@ -87,7 +88,8 @@ const NoteEditor = ({ note, onSave, onClose }) => {
       return;
     }
 
-    if ((noteType === 'voice' || noteType === 'video') && !mediaBlob && !note?.media_url) {
+    if ((noteType === 'voice' || noteType === 'video') && !mediaBlob &&
+      (!note?.media_url || mediaAction === 'remove')) {
       setError(`Please record a ${noteType} note before saving`);
       return;
     }
@@ -95,7 +97,7 @@ const NoteEditor = ({ note, onSave, onClose }) => {
     try {
       setIsSubmitting(true);
       setError(null);
-      await onSave({ title, content, tags, type: noteType, media: mediaBlob });
+      await onSave({ title, content, tags, type: noteType, media: mediaBlob, mediaAction });
     } catch (err) {
       console.error('Failed to save note:', err);
       setError(err.response?.data?.message || 'Failed to save note. Please try again.');
@@ -214,7 +216,7 @@ const NoteEditor = ({ note, onSave, onClose }) => {
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setNoteType(value)}
+                  onClick={() => { setNoteType(value); setMediaBlob(null); setMediaAction('keep'); }}
                   className={`flex items-center px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
                     noteType === value
                       ? 'bg-blue-600 text-white border-blue-600'
@@ -253,7 +255,7 @@ const NoteEditor = ({ note, onSave, onClose }) => {
                 key={noteType}
                 mode={noteType}
                 existingMediaUrl={note?.media_url && note?.type === noteType ? `${API_ORIGIN}${note.media_url}` : null}
-                onMediaChange={setMediaBlob}
+                onMediaChange={(blob, action) => { setMediaBlob(blob); if (action) setMediaAction(action); }}
               />
             </div>
           )}

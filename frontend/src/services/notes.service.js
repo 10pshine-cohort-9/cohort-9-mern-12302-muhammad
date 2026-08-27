@@ -5,9 +5,9 @@ export const getNotes = async () => {
   return response.data;
 };
 
-const buildNotePayload = ({ title, content, tags, type, media }) => {
+const buildNotePayload = ({ title, content, tags, type, media, mediaAction = 'keep' }) => {
   if (!media) {
-    return { data: { title, content, tags, type }, headers: undefined };
+    return { data: { title, content, tags, type, mediaAction }, headers: undefined };
   }
 
   const formData = new FormData();
@@ -15,6 +15,7 @@ const buildNotePayload = ({ title, content, tags, type, media }) => {
   formData.append('content', content || '');
   formData.append('tags', tags || '');
   formData.append('type', type || 'text');
+  formData.append('mediaAction', mediaAction);
   const extension = media.type.split('/')[1] || 'webm';
   formData.append('media', media, `recording.${extension}`);
 

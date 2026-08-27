@@ -89,12 +89,13 @@ const ProfileModal = ({ onClose }) => {
           )}
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Email</label>
+            <label htmlFor="profile-email" className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Email</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Mail className="h-4 w-4 text-gray-400" />
               </div>
               <input
+                id="profile-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -104,12 +105,13 @@ const ProfileModal = ({ onClose }) => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">New Password (optional)</label>
+            <label htmlFor="profile-new-password" className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">New Password (optional)</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Lock className="h-4 w-4 text-gray-400" />
               </div>
               <input
+                id="profile-new-password"
                 type="password"
                 placeholder="Leave blank to keep current password"
                 value={newPassword}
@@ -121,12 +123,13 @@ const ProfileModal = ({ onClose }) => {
 
           {newPassword && (
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Confirm New Password</label>
+              <label htmlFor="profile-confirm-password" className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Confirm New Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
+                  id="profile-confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -137,12 +140,13 @@ const ProfileModal = ({ onClose }) => {
           )}
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Current Password</label>
+            <label htmlFor="profile-current-password" className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Current Password</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Lock className="h-4 w-4 text-gray-400" />
               </div>
               <input
+                id="profile-current-password"
                 type="password"
                 placeholder="Required to confirm changes"
                 value={currentPassword}

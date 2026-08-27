@@ -6,6 +6,8 @@ const requestLogger = require('./middleware/requestLogger');
 const errorHandler = require('./middleware/errorHandler');
 const routes = require('./routes');
 const AppError = require('./utils/AppError');
+const { Note } = require('./models');
+const { protect } = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -23,7 +25,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
 // Serve uploaded media files (voice/video notes)
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.get('/uploads/notes/:filename', protect, async (req, res, next) => {
+  try {
+    const filename = path.basename(req.params.filename);
+    const mediaUrl = `/uploads/notes/${filename}`;
+    const note = await Note.findOne({ where: { media_url: mediaUrl, user_id: req.user.id } });
+    if (!note) return next(new AppError('Media not found', 404));
+    return res.sendFile(path.join(__dirname, '..', 'uploads', 'notes', filename));
+  } catch (error) {
+    return next(error);
+  }
+});
 
 // API routes
 app.use('/api', routes);

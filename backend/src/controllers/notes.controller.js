@@ -94,7 +94,7 @@ const getNoteById = async (req, res, next) => {
 const updateNote = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, content, tags, type } = req.body;
+    const { title, content, tags, type, mediaAction = 'keep' } = req.body;
     const user_id = req.user.id;
 
     const note = await Note.findOne({
@@ -113,9 +113,30 @@ const updateNote = async (req, res, next) => {
     }
     if (content !== undefined) note.content = content;
     if (tags !== undefined) note.tags = tags;
-    if (type !== undefined && ['text', 'voice', 'video'].includes(type)) note.type = type;
+    const requestedType = type === undefined ? note.type : type;
+    if (!['text', 'voice', 'video'].includes(requestedType)) {
+      return next(new AppError('Invalid note type', 400));
+    }
+    if (!['keep', 'remove', 'replace'].includes(mediaAction)) {
+      return next(new AppError('Invalid media action', 400));
+    }
+    if ((requestedType === 'voice' || requestedType === 'video') && !req.file &&
+        (!note.media_url || mediaAction === 'remove')) {
+      return next(new AppError(`Please provide a ${requestedType} recording`, 400));
+    }
+    if ((requestedType === 'text' || mediaAction === 'remove') && note.media_url) {
+      deleteMediaFile(note.media_url);
+      note.media_url = null;
+      note.media_mime = null;
+    }
+    note.type = requestedType;
 
     if (req.file) {
+        const isWebm = req.file.mimetype === 'audio/webm' || req.file.mimetype === 'video/webm';
+        if ((requestedType === 'voice' && !req.file.mimetype.startsWith('audio/') && !isWebm) ||
+          (requestedType === 'video' && !req.file.mimetype.startsWith('video/') && !isWebm)) {
+        return next(new AppError(`The uploaded file is not a ${requestedType} recording`, 400));
+      }
       deleteMediaFile(note.media_url);
       note.media_url = `/uploads/notes/${req.file.filename}`;
       note.media_mime = req.file.mimetype;

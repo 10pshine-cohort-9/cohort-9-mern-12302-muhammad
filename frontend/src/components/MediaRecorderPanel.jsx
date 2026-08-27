@@ -98,7 +98,7 @@ const MediaRecorderPanel = ({ mode, existingMediaUrl, onMediaChange }) => {
     setPreviewUrl(null);
     setElapsed(0);
     setPermissionState('idle');
-    onMediaChange(null);
+    onMediaChange(null, previewUrl ? 'keep' : (existingMediaUrl ? 'remove' : 'keep'));
   };
 
   const attachLiveVideo = (node) => {

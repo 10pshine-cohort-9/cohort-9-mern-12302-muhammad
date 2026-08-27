@@ -1,8 +1,8 @@
 import React from 'react';
+import { API_ORIGIN } from '../services/api';
 import { Edit2, Trash2, Calendar, Hash, Mic, Video } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
-const API_ORIGIN = 'http://localhost:5000';
 
 const NoteCard = ({ note, onEdit, onDelete }) => {
   // Strip HTML tags for preview and truncate

@@ -63,7 +63,7 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 ml-1">
+              <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 ml-1">
                 Email Address
               </label>
               <div className="relative">
@@ -71,7 +71,7 @@ const Login = () => {
                   <Mail className={`h-5 w-5 ${errors.email ? 'text-red-400' : 'text-gray-400'}`} />
                 </div>
                 <input
-                  id="email"
+                  id="login-email"
                   type="email"
                   autoComplete="email"
                   className={`block w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900/50 border ${errors.email ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm`}
@@ -86,7 +86,7 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 ml-1">
+              <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 ml-1">
                 Password
               </label>
               <div className="relative">
@@ -94,7 +94,7 @@ const Login = () => {
                   <Lock className={`h-5 w-5 ${errors.password ? 'text-red-400' : 'text-gray-400'}`} />
                 </div>
                 <input
-                  id="password"
+                  id="login-password"
                   type="password"
                   autoComplete="current-password"
                   className={`block w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900/50 border ${errors.password ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm`}
