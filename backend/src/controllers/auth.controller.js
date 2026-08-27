@@ -114,8 +114,72 @@ const getMe = async (req, res, next) => {
   }
 };
 
+const updateProfile = async (req, res, next) => {
+  try {
+    const { email, currentPassword, newPassword } = req.body;
+
+    if (!email && !newPassword) {
+      return next(new AppError('Please provide an email or new password to update', 400));
+    }
+
+    if (!currentPassword) {
+      return next(new AppError('Current password is required to update your profile', 400));
+    }
+
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return next(new AppError('User not found', 404));
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return next(new AppError('Current password is incorrect', 401));
+    }
+
+    if (email) {
+      if (typeof email !== 'string' || !isValidEmail(email)) {
+        return next(new AppError('Please provide a valid email address', 400));
+      }
+
+      const normalizedEmail = email.toLowerCase().trim();
+      if (normalizedEmail !== user.email) {
+        const existingUser = await User.findOne({ where: { email: normalizedEmail } });
+        if (existingUser) {
+          return next(new AppError('Email is already registered', 400));
+        }
+        user.email = normalizedEmail;
+      }
+    }
+
+    if (newPassword) {
+      if (typeof newPassword !== 'string' || newPassword.length < 8) {
+        return next(new AppError('Password must be at least 8 characters long', 400));
+      }
+      user.password = newPassword;
+    }
+
+    await user.save();
+
+    logger.info({ userId: user.id }, 'User profile updated successfully');
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        created_at: user.created_at,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   signup,
   login,
   getMe,
+  updateProfile,
 };

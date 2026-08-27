@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
-import { X, Save, Hash, Type, Bold, Image as ImageIcon, Link, Code, Palette, AlignLeft } from 'lucide-react';
+import { X, Save, Hash, Type, Bold, Link } from 'lucide-react';
 
 const NoteEditor = ({ note, onSave, onClose }) => {
   const [title, setTitle] = useState('');
@@ -32,14 +32,10 @@ const NoteEditor = ({ note, onSave, onClose }) => {
         placeholder: 'Start writing your thoughts, ideas, and tasks here...',
         modules: {
           toolbar: [
-            [{ header: [1, 2, 3, 4, 5, 6, false] }],
-            [{ font: [] }],
+            [{ header: [1, 2, 3, false] }],
             ['bold', 'italic', 'underline', 'strike'],
-            [{ color: [] }, { background: [] }],
-            [{ script: 'sub' }, { script: 'super' }],
             [{ list: 'ordered' }, { list: 'bullet' }],
-            [{ indent: '-1' }, { indent: '+1' }, { align: [] }],
-            ['link', 'image', 'video', 'blockquote', 'code-block'],
+            ['link'],
             ['clean'],
           ],
           history: {
@@ -220,11 +216,7 @@ const NoteEditor = ({ note, onSave, onClose }) => {
             <div className="flex items-center justify-between mt-2 px-1">
               <div className="flex flex-wrap items-center text-[10px] text-gray-400 dark:text-gray-500 gap-x-4 gap-y-1">
                 <span className="flex items-center"><Bold className="h-3 w-3 mr-1" /> Rich Text</span>
-                <span className="flex items-center"><Palette className="h-3 w-3 mr-1" /> Colors</span>
-                <span className="flex items-center"><ImageIcon className="h-3 w-3 mr-1" /> Media</span>
                 <span className="flex items-center"><Link className="h-3 w-3 mr-1" /> Links</span>
-                <span className="flex items-center"><AlignLeft className="h-3 w-3 mr-1" /> Alignment</span>
-                <span className="flex items-center"><Code className="h-3 w-3 mr-1" /> Code blocks</span>
               </div>
             </div>
           </div>

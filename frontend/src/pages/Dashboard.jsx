@@ -1,21 +1,25 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import useAuth from '../hooks/useAuth';
-import { LogOut, User, PlusCircle, Search, Moon, Sun, X } from 'lucide-react';
+import { LogOut, User, PlusCircle, Search, Moon, Sun, X, StickyNote, ListTodo } from 'lucide-react';
 import * as noteService from '../services/notes.service';
 import NoteCard from '../components/NoteCard';
 import NoteEditor from '../components/NoteEditor';
+import ProfileModal from '../components/ProfileModal';
+import TaskList from '../components/TaskList';
 import { ThemeContext } from '../context/ThemeContext';
 import DOMPurify from 'dompurify';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const [activeTab, setActiveTab] = useState('notes');
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [currentEditingNote, setCurrentEditingNote] = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const fetchNotes = async () => {
     try {
@@ -98,32 +102,34 @@ const Dashboard = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center gap-4">
             <div className="shrink-0 flex items-center">
-              <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400 tracking-tight">NotesApp</h1>
+              <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400 tracking-tight">Notely</h1>
             </div>
 
             {/* Search Bar */}
-            <div className="flex-grow max-w-2xl hidden md:block">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
+            {activeTab === 'notes' && (
+              <div className="flex-grow max-w-2xl hidden md:block">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search notes by title, content or tags..."
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  {searchQuery && (
+                    <button 
+                      onClick={() => setSearchQuery('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
-                <input
-                  type="text"
-                  placeholder="Search notes by title, content or tags..."
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
               </div>
-            </div>
+            )}
 
             <div className="flex items-center space-x-2 md:space-x-4">
               <button
@@ -134,10 +140,14 @@ const Dashboard = () => {
                 {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
               
-              <div className="hidden sm:flex items-center text-gray-700 dark:text-gray-200 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
+              <button
+                onClick={() => setIsProfileOpen(true)}
+                className="hidden sm:flex items-center text-gray-700 dark:text-gray-200 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                title="Profile Settings"
+              >
                 <User className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <span className="text-sm font-medium truncate max-w-[100px]">{user?.name}</span>
-              </div>
+              </button>
 
               <button
                 onClick={logout}
@@ -151,24 +161,60 @@ const Dashboard = () => {
         </div>
       </nav>
 
-      {/* Mobile Search Bar */}
-      <div className="md:hidden px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+      {/* Tabs */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shrink-0">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-6">
+            <button
+              onClick={() => setActiveTab('notes')}
+              className={`flex items-center py-3 border-b-2 text-sm font-semibold transition-colors ${
+                activeTab === 'notes'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+            >
+              <StickyNote className="mr-2 h-4 w-4" />
+              Notes
+            </button>
+            <button
+              onClick={() => setActiveTab('tasks')}
+              className={`flex items-center py-3 border-b-2 text-sm font-semibold transition-colors ${
+                activeTab === 'tasks'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+            >
+              <ListTodo className="mr-2 h-4 w-4" />
+              Tasks
+            </button>
           </div>
-          <input
-            type="text"
-            placeholder="Search notes..."
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
         </div>
       </div>
 
+      {/* Mobile Search Bar */}
+      {activeTab === 'notes' && (
+        <div className="md:hidden px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search notes..."
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+
       <main className="flex-grow flex flex-col overflow-x-hidden">
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-8 flex-grow flex flex-col">
+          {activeTab === 'tasks' ? (
+            <TaskList />
+          ) : (
+          <>
           <div className="flex justify-between items-center mb-8">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">My Notes</h2>
@@ -226,6 +272,8 @@ const Dashboard = () => {
               ))}
             </div>
           )}
+          </>
+          )}
         </div>
       </main>
 
@@ -236,6 +284,10 @@ const Dashboard = () => {
           onSave={handleSaveNote}
           onClose={() => setIsEditorOpen(false)}
         />
+      )}
+
+      {isProfileOpen && (
+        <ProfileModal onClose={() => setIsProfileOpen(false)} />
       )}
     </div>
   );

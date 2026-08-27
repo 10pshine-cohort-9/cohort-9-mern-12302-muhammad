@@ -10,9 +10,11 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
     return cleanHTML.length > 120 ? cleanHTML.substring(0, 120) + '...' : cleanHTML;
   };
 
-  const formattedDate = note.updated_at ? new Date(note.updated_at).toLocaleDateString(undefined, {
+  const formattedDate = note.updated_at ? new Date(note.updated_at).toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   }) : 'No date';
 
   const tags = note.tags ? note.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [];

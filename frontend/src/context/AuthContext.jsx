@@ -45,8 +45,19 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateProfile = async (data) => {
+    try {
+      const res = await authService.updateProfile(data);
+      setUser(res.user);
+      return res;
+    } catch (error) {
+      console.error("Profile update failed", error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
