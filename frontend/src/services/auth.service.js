@@ -27,10 +27,20 @@ const getMe = async () => {
   }
 };
 
+const updateProfile = async (data) => {
+  try {
+    const response = await api.put('/auth/profile', data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 const authService = {
   register,
   login,
   getMe,
+  updateProfile,
 };
 
 export default authService;

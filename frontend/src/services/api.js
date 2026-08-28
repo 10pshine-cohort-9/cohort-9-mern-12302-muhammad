@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 // Configure standard Axios instance
+export const API_ORIGIN = import.meta.env.VITE_API_ORIGIN || 'http://localhost:5000';
+
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Adjust if backend port changes
+  baseURL: `${API_ORIGIN}/api`,
   headers: {
     'Content-Type': 'application/json',
   },

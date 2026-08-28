@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
-const Note = sequelize.define(
-  'Note',
+const Task = sequelize.define(
+  'Task',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,26 +13,10 @@ const Note = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    content: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    tags: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    type: {
-      type: DataTypes.ENUM('text', 'voice', 'video'),
+    is_completed: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: 'text',
-    },
-    media_url: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    media_mime: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      defaultValue: false,
     },
     user_id: {
       type: DataTypes.INTEGER,
@@ -44,11 +28,11 @@ const Note = sequelize.define(
     },
   },
   {
-    tableName: 'notes',
+    tableName: 'tasks',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
   }
 );
 
-module.exports = Note;
+module.exports = Task;
