@@ -31,6 +31,7 @@ app.get('/uploads/notes/:filename', protect, async (req, res, next) => {
     const mediaUrl = `/uploads/notes/${filename}`;
     const note = await Note.findOne({ where: { media_url: mediaUrl, user_id: req.user.id } });
     if (!note) return next(new AppError('Media not found', 404));
+    if (note.media_mime) res.type(note.media_mime);
     return res.sendFile(path.join(__dirname, '..', 'uploads', 'notes', filename));
   } catch (error) {
     return next(error);

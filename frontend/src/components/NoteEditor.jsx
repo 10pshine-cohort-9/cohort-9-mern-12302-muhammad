@@ -3,7 +3,6 @@ import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 import { X, Save, Hash, Type, Bold, Link, Mic, Video } from 'lucide-react';
 import MediaRecorderPanel from './MediaRecorderPanel';
-import { API_ORIGIN } from '../services/api';
 
 const NoteEditor = ({ note, onSave, onClose }) => {
   const [title, setTitle] = useState('');
@@ -254,15 +253,17 @@ const NoteEditor = ({ note, onSave, onClose }) => {
               <MediaRecorderPanel
                 key={noteType}
                 mode={noteType}
-                existingMediaUrl={note?.media_url && note?.type === noteType ? `${API_ORIGIN}${note.media_url}` : null}
+                existingMediaUrl={note?.media_url && note?.type === noteType ? note.media_url : null}
                 onMediaChange={(blob, action) => { setMediaBlob(blob); if (action) setMediaAction(action); }}
               />
             </div>
           )}
 
-          <div className={`flex-grow flex flex-col space-y-1 ${noteType !== 'text' ? 'hidden' : ''}`}>
-            <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">Content</label>
-            <div className="flex-grow flex flex-col border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden min-h-[350px] bg-white dark:bg-gray-900 shadow-inner">
+          <div className="flex-grow flex flex-col space-y-1">
+            <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider ml-1">
+              {noteType === 'text' ? 'Content' : 'Text Content (optional)'}
+            </label>
+            <div className={`flex-grow flex flex-col border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-inner ${noteType === 'text' ? 'min-h-[350px]' : 'min-h-[150px]'}`}>
               <div className="flex-grow flex flex-col h-full quill-parent">
                 <div ref={editorRef} className="flex-grow flex flex-col h-full" />
               </div>

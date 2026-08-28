@@ -1,10 +1,14 @@
 import React from 'react';
-import { API_ORIGIN } from '../services/api';
 import { Edit2, Trash2, Calendar, Hash, Mic, Video } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import useAuthenticatedMedia from '../hooks/useAuthenticatedMedia';
 
 
 const NoteCard = ({ note, onEdit, onDelete }) => {
+  const mediaUrl = useAuthenticatedMedia(
+    (note.type === 'voice' || note.type === 'video') ? note.media_url : null
+  );
+
   // Strip HTML tags for preview and truncate
   const createPreview = (htmlString) => {
     if (!htmlString) return '';
@@ -37,11 +41,15 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
         </div>
 
         {note.type === 'voice' && note.media_url && (
-          <audio src={`${API_ORIGIN}${note.media_url}`} controls className="w-full mb-3" />
+          mediaUrl
+            ? <audio src={mediaUrl} controls className="w-full mb-3" />
+            : <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">Loading audio...</p>
         )}
 
         {note.type === 'video' && note.media_url && (
-          <video src={`${API_ORIGIN}${note.media_url}`} controls className="w-full rounded-lg mb-3 max-h-48 bg-black" />
+          mediaUrl
+            ? <video src={mediaUrl} controls className="w-full rounded-lg mb-3 max-h-48 bg-black" />
+            : <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">Loading video...</p>
         )}
 
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
