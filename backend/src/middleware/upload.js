@@ -45,9 +45,17 @@ const validateAndStore = (req, res, next) => {
        !(signature.mime === 'video/webm' && req.file.mimetype === 'audio/webm'))) {
     return next(new AppError('Unsupported or invalid media file.', 400));
   }
+  // Audio-webm and video-webm share the same container signature, so the
+  // byte check alone can't tell them apart — use the note's declared type.
+  let resolvedMime = signature.mime;
+  if (signature.extension === 'webm') {
+    if (req.body.type === 'video') resolvedMime = 'video/webm';
+    else if (req.body.type === 'voice') resolvedMime = 'audio/webm';
+  }
+
   const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
   req.file.filename = `${uniqueSuffix}.${signature.extension}`;
-  req.file.mimetype = signature.mime;
+  req.file.mimetype = resolvedMime;
   fs.writeFile(path.join(uploadDir, req.file.filename), req.file.buffer, (error) => {
     if (error) return next(error);
     delete req.file.buffer;

@@ -9,11 +9,17 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
     (note.type === 'voice' || note.type === 'video') ? note.media_url : null
   );
 
-  // Strip HTML tags for preview and truncate
+  // Keep basic formatting (bold/italic/lists/etc.) for the preview, but strip
+  // everything else (scripts, attributes, images...) to stay safe from XSS.
   const createPreview = (htmlString) => {
     if (!htmlString) return '';
-    const cleanHTML = DOMPurify.sanitize(htmlString, { ALLOWED_TAGS: [] });
-    return cleanHTML.length > 120 ? cleanHTML.substring(0, 120) + '...' : cleanHTML;
+    const cleanHTML = DOMPurify.sanitize(htmlString, {
+      ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 's', 'ol', 'ul', 'li', 'br', 'p', 'span'],
+      ALLOWED_ATTR: [],
+    });
+    // Quill's empty state is "<p><br></p>" — treat that as no content.
+    const isEmpty = cleanHTML.replace(/<[^>]*>/g, '').trim() === '';
+    return isEmpty ? '' : cleanHTML;
   };
 
   const formattedDate = note.updated_at ? new Date(note.updated_at).toLocaleString(undefined, {
@@ -27,6 +33,10 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
+      <style>{`
+        .note-preview ol { list-style: decimal; padding-left: 1.25rem; }
+        .note-preview ul { list-style: disc; padding-left: 1.25rem; }
+      `}</style>
       <div className="p-6 flex-grow">
         <div className="flex justify-between items-start mb-3">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight truncate flex-grow mr-2" title={note.title}>
@@ -52,9 +62,17 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
             : <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">Loading video...</p>
         )}
 
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
-          {createPreview(note.content) || <span className="italic opacity-50">No content</span>}
-        </p>
+        {(() => {
+          const preview = createPreview(note.content);
+          return preview ? (
+            <div
+              className="note-preview text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3"
+              dangerouslySetInnerHTML={{ __html: preview }}
+            />
+          ) : (
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 italic opacity-50">No content</p>
+          );
+        })()}
 
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-auto">
