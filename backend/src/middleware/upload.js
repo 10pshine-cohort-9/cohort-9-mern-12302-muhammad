@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const AppError = require('../utils/AppError');
 
 const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'notes');
@@ -53,7 +54,7 @@ const validateAndStore = (req, res, next) => {
     else if (req.body.type === 'voice') resolvedMime = 'audio/webm';
   }
 
-  const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+  const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(16).toString('hex')}`;
   req.file.filename = `${uniqueSuffix}.${signature.extension}`;
   req.file.mimetype = resolvedMime;
   fs.writeFile(path.join(uploadDir, req.file.filename), req.file.buffer, (error) => {
@@ -68,6 +69,7 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB
+    files: 1, // only one media file per note
   },
 });
 

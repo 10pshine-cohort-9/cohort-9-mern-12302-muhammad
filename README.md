@@ -1,18 +1,25 @@
 # cohort-9-mern-12302-muhammad
 Cohort 9 — MERN (NodeJS+ReactJS) assignment for Muhammad Ahmad
 
-## Code Quality (SonarQube)
+## Code Quality (SonarCloud)
 
-This repo is configured for SonarQube/SonarCloud analysis via [`sonar-project.properties`](sonar-project.properties)
-at the repo root, covering both `backend/` and `frontend/`.
+This repo is analyzed on [SonarCloud](https://sonarcloud.io) (project key
+`MuhammadAhmad-18_cohort-9-mern-12302-ahmad`, org `muhammadahmad-18`), configured via
+[`sonar-project.properties`](sonar-project.properties) at the repo root, covering both `backend/` and `frontend/`.
 
-1. Generate coverage reports (SonarQube reads these as `lcov.info`):
+**Automatic (CI):** [`.github/workflows/sonarcloud.yml`](.github/workflows/sonarcloud.yml) runs on every push to
+`main`/`develop` and on every pull request — it spins up a MySQL service, runs both test suites with coverage, then
+triggers the SonarCloud scan. It authenticates using the `SONAR_TOKEN` repo secret.
+
+**Manual / local run:**
+1. Generate coverage reports (SonarCloud reads these as `lcov.info`):
    ```
    cd backend && npm run test:coverage
    cd ../frontend && npm run test:coverage
    ```
 2. Run the scanner from the repo root:
    ```
-   npx sonar-scanner -Dsonar.host.url=<your-server-url> -Dsonar.token=<your-token>
+   npx sonar-scanner -Dsonar.token=<your-token>
    ```
-3. Exported PDF reports from the SonarQube dashboard go in [`sonarqube-reports/`](sonarqube-reports/).
+
+Exported PDF reports from the SonarCloud dashboard go in [`sonarqube-reports/`](sonarqube-reports/).

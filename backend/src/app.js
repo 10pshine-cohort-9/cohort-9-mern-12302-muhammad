@@ -14,8 +14,23 @@ const app = express();
 // Security HTTP headers
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
-// Enable CORS
-app.use(cors());
+// Enable CORS — restrict to explicitly trusted origins only
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow non-browser requests (no Origin header, e.g. curl/health checks)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new AppError('Not allowed by CORS', 403));
+    },
+  })
+);
 
 // Body parser
 app.use(express.json());
