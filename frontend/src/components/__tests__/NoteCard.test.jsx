@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import NoteCard from '../NoteCard';
 
-jest.mock('../../hooks/useAuthenticatedMedia', () => jest.fn(() => null));
+jest.mock('../../hooks/useAuthenticatedMedia', () => jest.fn(() => ({ url: null, error: false, retry: jest.fn() })));
 
 const baseNote = {
   id: 1,
