@@ -5,7 +5,7 @@ import useAuthenticatedMedia from '../hooks/useAuthenticatedMedia';
 
 
 const NoteCard = ({ note, onEdit, onDelete }) => {
-  const mediaUrl = useAuthenticatedMedia(
+  const { url: mediaUrl, error: mediaError, retry: retryMedia } = useAuthenticatedMedia(
     (note.type === 'voice' || note.type === 'video') ? note.media_url : null
   );
 
@@ -51,15 +51,29 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
         </div>
 
         {note.type === 'voice' && note.media_url && (
-          mediaUrl
-            ? <audio src={mediaUrl} controls className="w-full mb-3" />
-            : <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">Loading audio...</p>
+          mediaError ? (
+            <div className="flex items-center space-x-2 mb-3">
+              <p className="text-xs text-red-500 dark:text-red-400">Failed to load audio.</p>
+              <button onClick={retryMedia} className="text-xs text-blue-600 dark:text-blue-400 hover:underline focus:outline-none">Retry</button>
+            </div>
+          ) : mediaUrl ? (
+            <audio src={mediaUrl} controls className="w-full mb-3" />
+          ) : (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">Loading audio...</p>
+          )
         )}
 
         {note.type === 'video' && note.media_url && (
-          mediaUrl
-            ? <video src={mediaUrl} controls className="w-full rounded-lg mb-3 max-h-48 bg-black" />
-            : <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">Loading video...</p>
+          mediaError ? (
+            <div className="flex items-center space-x-2 mb-3">
+              <p className="text-xs text-red-500 dark:text-red-400">Failed to load video.</p>
+              <button onClick={retryMedia} className="text-xs text-blue-600 dark:text-blue-400 hover:underline focus:outline-none">Retry</button>
+            </div>
+          ) : mediaUrl ? (
+            <video src={mediaUrl} controls className="w-full rounded-lg mb-3 max-h-48 bg-black" />
+          ) : (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">Loading video...</p>
+          )
         )}
 
         {(() => {

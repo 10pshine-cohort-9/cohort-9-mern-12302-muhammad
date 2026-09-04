@@ -7,15 +7,21 @@ import { API_ORIGIN } from '../services/api';
 // an authenticated blob instead and hand back a local object URL to play.
 const useAuthenticatedMedia = (mediaPath) => {
   const [url, setUrl] = useState(null);
+  const [error, setError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+
+  const retry = () => setRetryKey((k) => k + 1);
 
   useEffect(() => {
     if (!mediaPath) {
       setUrl(null);
+      setError(false);
       return undefined;
     }
 
     let objectUrl = null;
     let cancelled = false;
+    setError(false);
 
     const token = localStorage.getItem('token');
     axios
@@ -29,16 +35,18 @@ const useAuthenticatedMedia = (mediaPath) => {
         setUrl(objectUrl);
       })
       .catch((err) => {
+        if (cancelled) return;
         console.error('Failed to load media:', err);
+        setError(true);
       });
 
     return () => {
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [mediaPath]);
+  }, [mediaPath, retryKey]);
 
-  return url;
+  return { url, error, retry };
 };
 
 export default useAuthenticatedMedia;
