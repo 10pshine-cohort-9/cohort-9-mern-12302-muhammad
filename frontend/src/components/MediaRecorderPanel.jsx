@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Video, Square, Trash2, ShieldAlert, RotateCcw } from 'lucide-react';
+import useAuthenticatedMedia from '../hooks/useAuthenticatedMedia';
 
 const formatTime = (seconds) => {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -21,6 +22,7 @@ const MediaRecorderPanel = ({ mode, existingMediaUrl, onMediaChange }) => {
   const liveVideoRef = useRef(null);
 
   const isVideo = mode === 'video';
+  const resolvedExistingUrl = useAuthenticatedMedia(existingMediaUrl);
 
   useEffect(() => {
     return () => {
@@ -127,9 +129,9 @@ const MediaRecorderPanel = ({ mode, existingMediaUrl, onMediaChange }) => {
 
       {!isRecording && hasPreview && (
         isVideo ? (
-          <video src={previewUrl || existingMediaUrl} controls className="w-full rounded-xl bg-black max-h-64" />
+          <video src={previewUrl || resolvedExistingUrl} controls className="w-full rounded-xl bg-black max-h-64" />
         ) : (
-          <audio src={previewUrl || existingMediaUrl} controls className="w-full" />
+          <audio src={previewUrl || resolvedExistingUrl} controls className="w-full" />
         )
       )}
 

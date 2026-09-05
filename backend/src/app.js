@@ -14,8 +14,23 @@ const app = express();
 // Security HTTP headers
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
-// Enable CORS
-app.use(cors());
+// Enable CORS — restrict to explicitly trusted origins only
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow non-browser requests (no Origin header, e.g. curl/health checks)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new AppError('Not allowed by CORS', 403));
+    },
+  })
+);
 
 // Body parser
 app.use(express.json());
@@ -31,6 +46,7 @@ app.get('/uploads/notes/:filename', protect, async (req, res, next) => {
     const mediaUrl = `/uploads/notes/${filename}`;
     const note = await Note.findOne({ where: { media_url: mediaUrl, user_id: req.user.id } });
     if (!note) return next(new AppError('Media not found', 404));
+    if (note.media_mime) res.type(note.media_mime);
     return res.sendFile(path.join(__dirname, '..', 'uploads', 'notes', filename));
   } catch (error) {
     return next(error);
